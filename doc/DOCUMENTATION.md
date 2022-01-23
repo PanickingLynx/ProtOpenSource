@@ -49,24 +49,19 @@ I personally do not know my way around this software but there are plenty of tut
 
 ## The code
 ### The include area
-*Lines 17-29*
 These various ```#include``` statements import libraries (headers) to the code. The libraries in *Lines 29-21* need to be downloaded via the PlatformIO library manager.
 
 ### The define area
-*Lines 31-42*
 These ```#define``` Statements act as a placeholder without an implicit type and their values are "inserted" at their point of reference in the code.
 
 ### The pre-declarations
-*Lines 44-48*
 A pre-declaration of functions for later redefinition. This is needed so that the C++ compiler doesn't freak out. This is a quirk of PlatformIO and would not be needed in regular ```.ino``` files edited in the Arduino IDE.
 
 ### The public variables
-*Lines 50-105*
 These variables have been declared in the most outer scope that main.cpp can give, meaning not in any functions or loops.
 This gives them the unique quality of being available inside every function of ```main.cpp```.
 
 ### setup()
-*Lines 108-13*
 This function is a standard function of the Arduino library and will only run once at power-on.
 
 It contains, as the name implies, Code to set up some things.
@@ -74,20 +69,16 @@ It contains, as the name implies, Code to set up some things.
 In our case, it contains code to set up the Microphone pin as an input, create a task for the second core of the ESP32 and set up the display.
 
 #### Setting the microphone pin (ADC Basics)
-*Line 109*
 This function call to the standard Arduino library, will configure the given pin, in our case defined in ```MIC_PIN```, as an input.
 We use this pin in particular since it contains an ADC (**A**nlogue to **D**igital **C**onverter). It will take the analogue output of the microphone and convert it into values that we can work with.
 
 #### Create a Core pinned task
-*Lines 110-119*
 This ```xTaskCreatePinnedToCore()``` function is exclusive to the ESP32, since this microcontroller has two cores available. Here we take the function ```Task2code``` and hand it over to our second core. (Or rather core 1 because our code runs on Core 2 by default)
 
 #### Set up the display defaults
-*Lines 121-134*
 This will set up the displays and display a short message to the screen.
 
 ### loop()
-*Lines 138-140*
 This function is a standard function of the Arduino library and will run forever after power-on.
 
 It only contains a call to the ```getMicrophoneLevel()``` function, the loop is held so minimal because it is good practice to keep your loop as clean as possible.
