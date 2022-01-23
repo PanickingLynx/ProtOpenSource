@@ -1,17 +1,19 @@
 /*
   Project: Open Source Protogen (Protogen Interactive Visor Base)
   Code by: PanickingLynx
-  This Version: V1 (20.01.2022)
+  This Version: V1.1 (23.01.2022)
 
-  Dear Fellow Furry or otherwhise interested Programmer,
-  please read the Code documentation in /doc/DOCUMENTATION.pdf
+  Dear fellow furry or otherwise interested programmer,
+  please read the code documentation in /doc/DOCUMENTATION.md
   before you ask me any questions at @PanickingLynx on Twitter or Telegram.
-  (Which is not yet possible so feel free to message)
 
-  If you can't find anything you need there or you find that something is missing, don't hesitate to message me!
+  If you can't find anything you need or if something is missing, don't hesitate to message me!
 
   XOXO ~ PanickingLynx
 */
+
+//Uncomment this if your matrices are displaying errors like color shifts or flickering pixels (Mostly the case with matrices bought from AliExpress)
+//#define PxMATRIX_SPI_FREQUENCY 19000000
 
 //Include Project dependencies
 #include <Arduino.h>
@@ -20,37 +22,39 @@
 #include <Adafruit_I2CDevice.h>
 #include <PxMatrix.h>
 
-//Load Sprites from Headerfiles in: /lib/FacialSprites/
-//Fill these files with your own data that you have exported from LED Matrix Studio
-#include <mouth_closed_sprite.h>
-#include <mouth_quiet_sprite.h>
-#include <mouth_normal_sprite.h>
-#include <mouth_loud_sprite.h>
-#include <mouth_yelling_sprite.h>
+//Load Sprites from Headerfiles in: /lib/facialSprites (They should be automatically found with Platform IO)
+//Fill these files with your own data that you have exported from LED Matrix Studio. Look into /doc/DOCUMENTATION.md on how to do this.
+#include "mouth_closed_sprite.h"
+#include "mouth_quiet_sprite.h"
+#include "mouth_normal_sprite.h"
+#include "mouth_loud_sprite.h"
+#include "mouth_yelling_sprite.h"
 
-#define MIC_PIN 12 //Sets the Pin of the Microphone to PIN 12
-#define P_LAT 22 //Connect your matrix to these pins !!!!!
+#define MIC_PIN 12 //Sets the pin of the microphone to PIN 12
+#define P_LAT 22 //Connect your matrix to these pins
 #define P_A 19
 #define P_B 23
 #define P_C 18
 #define P_D 5
 #define P_E 15
 #define P_OE 2
+//For how the ESP and matrices are connected, please consult the graphic made by @Yuri_Lynx found in /doc/ESP32-TO-P3MATRIX.pdf
+//This graphic shows you how to attach circle matrices for the sides as well, but be aware that this code doesn't cover these.
 
-// Define Matrix dimensions
+//Define matrix dimensions
 #define matrix_width 128
 #define matrix_height 32
 
-void getMicrophoneLevel(); //PREDEFINE OF FUNCTION
-void isSpeaking(int microphoneLevel); //PREDEFINE OF FUNCTION
-void isIdle(); //PREDEFINE OF FUNCTION
-void drawFace(int x_offset, int y_offset, const uint8_t pixels[]); //PREDEFINE OF FUNCTION
-void Task2code( void * pvParameters ); //PREDEFINE OF FUNCTION
+void getMicrophoneLevel(); //Predefine of function
+void isSpeaking(int microphoneLevel); //Predefine of function
+void isIdle(); //Predefine of function
+void drawFace(int x_offset, int y_offset, const uint8_t pixels[]); //Predefine of function
+void Task2code( void * pvParameters ); //Predefine of function
 
 hw_timer_t * timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
-//Predefining up Task variables for Dual Core operation.
+//Predefining up task variables for dual core operation.
 TaskHandle_t Task1; 
 TaskHandle_t Task2;
 
@@ -58,36 +62,14 @@ TaskHandle_t Task2;
 unsigned long previousMillis; 
 unsigned long currentMillis = millis();
 
-//Voice threshholds
-/*
-  READ CAREFULLY:
-
-  You probably have to adjust these values depending on the following factors:
-    - Microphone placement
-    - Visor design
-    - Head design
-    - Fan inclusion
-    - Your Voice
-
-  You can find a calibration sketch at: github.com/PanickingLynx/ProtoMicrophoneCalibration
-
-  PLEASE DO THIS FIRST, THESE VALUES MAY BE DEFAULTS BUT ARE NOT NESSECARILY WORKING FOR YOU
-*/
-const int start_talking_threshhold = 2100;
-const int normal_threshhold = 2200;
-const int loud_threshhold = 2300;
-const int yelling_threshhold = 2400;
-
 // This defines the 'on' time of the display in use. The larger this number,
-// the brighter the display. If too large the ESP will crash
+// the brighter the display. The ESP will crash if this number is too high.
 uint8_t display_draw_time = 20; //10-50 is usually fine
 
-// PxMATRIX display(matrix_width,matrix_height,P_LAT, P_OE,P_A,P_B,P_C);
-//PxMATRIX display(128,32,P_LAT, P_OE,P_A,P_B,P_C,P_D);
 PxMATRIX display(128, 32, P_LAT, P_OE, P_A, P_B, P_C, P_D, P_E);
 
 /*
-  Predefining Color Palette
+  Predefining color palette for start-up sequence
 
   Add your own colors by adding a line like:
 
@@ -124,13 +106,13 @@ void setup(){
 
   display.setFastUpdate(false);
   display.clearDisplay();
-  display.setTextColor(WHITE);
+  display.setTextColor(BLUE);
   display.setCursor(16, 0);
-  display.print("ProtOpenSource"); //CHANGE THIS FOR DIFFERENT UPPER STARTUP TEXT
+  display.print("ProtO.S."); //CHANGE THIS FOR DIFFERENT UPPER STARTUP TEXT
   delay(1000);
   display.setTextColor(WHITE);
   display.setCursor(26, 8);
-  display.print("V1"); //CHANGE THIS FOR DIFFERENT LOWER STARTUP TEXT
+  display.print("V1.1"); //CHANGE THIS FOR DIFFERENT LOWER STARTUP TEXT
   delay(3000);
 }
 
@@ -139,10 +121,30 @@ void loop(){
     getMicrophoneLevel(); //Constantly listen to the microphone
 }
 
+//Voice threshholds
+/*
+  READ CAREFULLY:
+
+  You probably have to adjust these values depending on the following factors:
+    - Microphone placement
+    - Visor design
+    - Head design
+    - Fan inclusion
+    - Your Voice
+
+  You can find a calibration sketch at: github.com/PanickingLynx/ProtoMicrophoneCalibration
+
+  PLEASE DO THIS FIRST, THESE VALUES MAY BE DEFAULTS BUT ARE NOT NESSECARILY WORKING FOR YOU
+*/
+const int start_talking_threshhold = 2100;
+const int normal_threshhold = 2200;
+const int loud_threshhold = 2300;
+const int yelling_threshhold = 2400;
+
 // Listens in on the microphone pin.
 void getMicrophoneLevel(){
-  int microphoneLevel = analogRead(MIC_PIN); //Read Pin value and subtract rough noise of mic
-  if (microphoneLevel > start_talking_threshhold){ //If more than 200 on level then speak
+  int microphoneLevel = analogRead(MIC_PIN); //Read pin value
+  if (microphoneLevel > start_talking_threshhold){ //If more than 2100 on level then speak
     isSpeaking(microphoneLevel);
   }else{ //Else shut up
     isIdle();
@@ -159,7 +161,7 @@ void isSpeaking(int microphoneLevel){
     }
   }
   else if(microphoneLevel > loud_threshhold){
-    // Yell a bit
+    // Speak loudly
     previousMillis = currentMillis;
     while (currentMillis - previousMillis <= 100){
       drawFace(0, 0, mouth_loud);
@@ -167,7 +169,7 @@ void isSpeaking(int microphoneLevel){
     }
   }
   else if(microphoneLevel > yelling_threshhold){
-    // PROTOPOSSUM GO AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    // Yell
     previousMillis = currentMillis;
     while (currentMillis - previousMillis <= 100){
       drawFace(0, 0, mouth_yelling);
@@ -175,7 +177,7 @@ void isSpeaking(int microphoneLevel){
     }
   }
   else{
-    //Open mouth tiny bit.
+    //Open mouth tiny bit
     previousMillis = currentMillis;
     while (currentMillis - previousMillis <= 100){
       drawFace(0, 0, mouth_quiet);
@@ -189,7 +191,7 @@ void isIdle(){
     drawFace(0, 0, mouth_closed);
 }
 
-//Draw the Passed sprite to the Screen pixel by pixel
+//Draw the passed sprite to the screen pixel by pixel
 //Screen will be drawn left to right, top to bottom
 void drawFace(int x_offset, int y_offset, const uint8_t pixels[]){
   int imageHeight = 32;
@@ -224,11 +226,6 @@ void drawFace(int x_offset, int y_offset, const uint8_t pixels[]){
 void Task2code( void * pvParameters ) {  
   for (;;) {
     delay(1);
-    previousMillis = currentMillis;
-    while (currentMillis - previousMillis <= 1)
-    {
-      currentMillis = millis();
-    }
-    display.display(50); //was 60
+    display.display(50);
   }
 }
