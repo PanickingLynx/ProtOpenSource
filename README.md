@@ -46,7 +46,7 @@ Also, make sure to give the code Comments a quick read for some further Informat
 
 ## Known Issues
 
-You tell me :)
+* Yelling state is never reached. (Need confirmation on that)
 
 ## Addendum
 
