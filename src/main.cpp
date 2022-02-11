@@ -13,7 +13,7 @@
 */
 
 //Uncomment this if your matrices are displaying errors like color shifts or flickering pixels (Mostly the case with matrices bought from AliExpress)
-//#define PxMATRIX_SPI_FREQUENCY 19000000
+#define PxMATRIX_SPI_FREQUENCY 19000000
 
 //Include Project dependencies
 #include <Arduino.h>
@@ -37,7 +37,7 @@
 #define P_C 18
 #define P_D 5
 #define P_E 15
-#define P_OE 2
+#define P_OE 16
 //For how the ESP and matrices are connected, please consult the graphic made by @Yuri_Lynx found in /doc/ESP32-TO-P3MATRIX.pdf
 //This graphic shows you how to attach circle matrices for the sides as well, but be aware that this code doesn't cover these.
 
@@ -64,7 +64,7 @@ unsigned long currentMillis = millis();
 
 // This defines the 'on' time of the display in use. The larger this number,
 // the brighter the display. The ESP will crash if this number is too high.
-uint8_t display_draw_time = 20; //10-50 is usually fine
+uint8_t display_draw_time = 10; //10-50 is usually fine
 
 PxMATRIX display(128, 32, P_LAT, P_OE, P_A, P_B, P_C, P_D, P_E);
 
