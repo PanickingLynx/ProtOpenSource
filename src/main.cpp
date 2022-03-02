@@ -132,8 +132,6 @@ void loop(){
     - Fan inclusion
     - Your Voice
 
-  You can find a calibration sketch at: github.com/PanickingLynx/ProtoMicrophoneCalibration
-
   PLEASE DO THIS FIRST, THESE VALUES MAY BE DEFAULTS BUT ARE NOT NESSECARILY WORKING FOR YOU
 */
 const int start_talking_threshhold = 2100;
