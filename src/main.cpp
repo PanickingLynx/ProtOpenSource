@@ -199,9 +199,7 @@ void drawFace(int x_offset, int y_offset, const uint8_t pixels[]){
   {
     for (int horizontal_increment = 0; horizontal_increment < imageWidth; horizontal_increment++)
     {
-
       display.drawPixelRGB888(horizontal_increment + x_offset, vertical_increment + y_offset, pixels[counter], pixels[counter + 1], pixels[counter + 2]);
-
       counter = counter + 3;
     }
   }
@@ -212,9 +210,7 @@ void drawFace(int x_offset, int y_offset, const uint8_t pixels[]){
   {
     for (int horizontal_increment = 63; horizontal_increment > -1; horizontal_increment--)
     {
-
       display.drawPixelRGB888(horizontal_increment + 64, vertical_increment + y_offset, pixels[counter], pixels[counter + 1], pixels[counter + 2]);
-
       counter = counter + 3;
     }
   }
