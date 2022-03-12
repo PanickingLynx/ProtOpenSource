@@ -44,10 +44,6 @@ Also, make sure to give the code Comments a quick read for some further Informat
 * Remove all delays if possible.
 * Make a dynamic animation loader.
 
-## Known Issues
-
-* Yelling state is never reached. (Need confirmation on that)
-
 ## Addendum
 
 I really enjoyed making this code.
