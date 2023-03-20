@@ -53,9 +53,6 @@ Also, make sure to give the code Comments a quick read for some further Informat
 I really enjoyed making this code.
 It was a fun experience to get back into doing some Arduino coding.
 
-Without my Friend [@stabbypssm](https://twitter.com/stabbypssm) I wouldn't have gotten the idea, so a big thanks in that regard!
-(Go check her out on Twitter!)
-
 What I really took issue with during the creation of this code,
 is that often when I looked up Protogen groups, which were sometimes even hidden behind a donation paywall,
 is that many people there really take great pride in hiding their code away or acting elitist about their accomplishement.
