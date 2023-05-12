@@ -26,7 +26,7 @@
 
 ## How to add your Protogen Face
 ### C++ Header Files
-The files contained in ```/lib/FacialSprites``` are so calles header files.
+The files contained in ```/lib/FacialSprites``` are so called header files.
 In this project, they act as a sort of variable storage so the big blocks of binary data (PROGMEMs) won't bloat the actual ```main.cpp``` file located in ```/src/main.cpp```.
 
 The five files represent five states of a talking mouth with different states of opening, and will advance and regress depending on the loudness of the talking done.
@@ -46,6 +46,8 @@ The data contents of that variable looking like ```0x0B, 0x00, 0x0F...``` etc., 
 ### LED Matrix Studio
 This software can be obtained at [Sourceforge](https://sourceforge.net/projects/led-matrix-studio/).
 I personally do not know my way around this software but there are plenty of tutorials and it also has it's own documentation.
+
+However, it is important that you export your files as **C / C++ FastLED** or else this will not work.
 
 ## The code
 ### The include area
