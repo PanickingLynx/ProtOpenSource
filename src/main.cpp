@@ -1,7 +1,7 @@
 /*
   Project: Open Source Protogen (Protogen Interactive Visor Base)
   Code by: PanickingLynx
-  This Version: V1.1 (23.01.2022)
+  This Version: V1.5 (17.05.2023)
 
   Dear fellow furry or otherwise interested programmer,
   please read the code documentation in /doc/DOCUMENTATION.md
@@ -30,6 +30,7 @@
 #include "mouth_loud_sprite.h"
 #include "mouth_yelling_sprite.h"
 
+// Set the connector pins for the LED matrices and microphone
 #define MIC_PIN 12 //Sets the pin of the microphone to PIN 12
 #define P_LAT 22 //Connect your matrix to these pins
 #define P_A 19
@@ -41,25 +42,26 @@
 //For how the ESP and matrices are connected, please consult the graphic made by @Yuri_Lynx found in /doc/ESP32-TO-P3MATRIX.pdf
 //This graphic shows you how to attach circle matrices for the sides as well, but be aware that this code doesn't cover these.
 
-//Define matrix dimensions
-#define matrix_width 128
-#define matrix_height 32
+#define UPPER_STARTUP "ProtOS"
+#define LOWER_STARTUP "V1.5"
 
-void getMicrophoneLevel(); //Predefine of function
-void isSpeaking(int microphoneLevel); //Predefine of function
-void isIdle(); //Predefine of function
-void drawFace(int x_offset, int y_offset, const uint8_t pixels[]); //Predefine of function
-void Task2code( void * pvParameters ); //Predefine of function
+// Predefine functions (nessecary for PlatformIO projects)
+void getMicrophoneLevel();
+void speak(int microphone_level);
+void isIdle(); 
+void drawFace(int x_offset, int y_offset, const uint8_t pixels[]); 
+void Task2code(void * pvParameters);
+void waitInterruptable(int millis_target);
 
 hw_timer_t * timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
 //Predefining up task variables for dual core operation.
-TaskHandle_t Task1; 
+TaskHandle_t Task1;
 TaskHandle_t Task2;
 
 //Predefines for Millis timer
-unsigned long previousMillis; 
+unsigned long previousMillis;
 unsigned long currentMillis = millis();
 
 // This defines the 'on' time of the display in use. The larger this number,
@@ -87,41 +89,40 @@ uint16_t MAGENTA = display.color565(255, 0, 255);
 uint16_t BLACK = display.color565(0, 0, 0);
 
 //Code in setup only runs once
-void setup(){
-  pinMode(MIC_PIN, INPUT); //Sets mode of mic pin (PIN 0) to input
-  xTaskCreatePinnedToCore(
-    Task2code,    // Task function.
-    "Task2",      // name of task.
-    11000,        //Stack size of task
-    NULL,         // parameter of the task
-    24,           // priority of the task
-    &Task2,       // Task handle to keep track of created task
-    0             // pin task to core 1
-  );          
-  delay(500);
+void setup() {
+    pinMode(MIC_PIN, INPUT); //Sets mode of mic pin (PIN 0) to input
+    xTaskCreatePinnedToCore(
+        Task2code, // Task function.
+        "Task2", // name of task.
+        11000, //Stack size of task
+        NULL, // parameter of the task
+        24, // priority of the task
+        &
+        Task2, // Task handle to keep track of created task
+        0 // pin task to core 1
+    );
+    display.begin(16);
+    display.setMuxDelay(2, 2, 2, 2, 2);
+    display.setPanelsWidth(2);
 
-  display.begin(16);
-  display.setMuxDelay(2, 2, 2, 2, 2);
-  display.setPanelsWidth(2);
-
-  display.setFastUpdate(false);
-  display.clearDisplay();
-  display.setTextColor(BLUE);
-  display.setCursor(16, 0);
-  display.print("ProtO.S."); //CHANGE THIS FOR DIFFERENT UPPER STARTUP TEXT
-  delay(1000);
-  display.setTextColor(WHITE);
-  display.setCursor(26, 8);
-  display.print("V1.1"); //CHANGE THIS FOR DIFFERENT LOWER STARTUP TEXT
-  delay(3000);
+    display.setFastUpdate(false);
+    display.clearDisplay();
+    display.setTextColor(BLUE);
+    display.setCursor(16, 0);
+    display.print(UPPER_STARTUP); 
+    waitInterruptable(1000);
+    display.setTextColor(WHITE);
+    display.setCursor(26, 8);
+    display.print(LOWER_STARTUP); 
+    waitInterruptable(3000);
 }
 
 //Code in loop will run forever
-void loop(){
-    getMicrophoneLevel(); //Constantly listen to the microphone
+void loop() {
+    int microphone_level = analogRead(MIC_PIN); //Read pin value
+    speak(microphone_level);
 }
 
-//Voice threshholds
 /*
   READ CAREFULLY:
 
@@ -139,91 +140,93 @@ const int normal_threshhold = 2200;
 const int loud_threshhold = 2300;
 const int yelling_threshhold = 2400;
 
-// Listens in on the microphone pin.
-void getMicrophoneLevel(){
-  int microphoneLevel = analogRead(MIC_PIN); //Read pin value
-  if (microphoneLevel > start_talking_threshhold){ //If more than 2100 on level then speak
-    isSpeaking(microphoneLevel);
-  }else{ //Else shut up
-    isIdle();
-  }
+void speak(int microphone_level) {
+    if (microphone_level > start_talking_threshhold){
+        previousMillis = currentMillis;
+        while (currentMillis - previousMillis <= 100) {
+            drawFace(0, 0, MOUTH_QUIET);
+            currentMillis = millis();
+        }
+    } else if (microphone_level > normal_threshhold) {
+        // Open mouth normally
+        previousMillis = currentMillis;
+        while (currentMillis - previousMillis <= 100) {
+            drawFace(0, 0, MOUTH_NORMAL);
+            currentMillis = millis();
+        }
+    } else if (microphone_level > loud_threshhold) {
+        // Speak loudly
+        previousMillis = currentMillis;
+        while (currentMillis - previousMillis <= 100) {
+            drawFace(0, 0, MOUTH_LOUD);
+            currentMillis = millis();
+        }
+    } else if (microphone_level > yelling_threshhold) {
+        // Yell
+        previousMillis = currentMillis;
+        while (currentMillis - previousMillis <= 100) {
+            drawFace(0, 0, MOUTH_YELLING);
+            currentMillis = millis();
+        }
+    } else {
+        //Keep mouth shut
+        previousMillis = currentMillis;
+        while (currentMillis - previousMillis <= 100) {
+            drawFace(0, 0, MOUTH_CLOSED);
+            currentMillis = millis();
+        }
+    }
 }
 
-void isSpeaking(int microphoneLevel){
-  if (microphoneLevel > normal_threshhold){
-    // Open mouth normally
+// Waits a time in milliseconds while still being interruptable.
+// Does not halt the processor.
+void waitInterruptable(int millis_target){
     previousMillis = currentMillis;
-    while (currentMillis - previousMillis <= 100){
-      drawFace(0, 0, mouth_normal);
-      currentMillis = millis();
+    while (currentMillis - previousMillis <= millis_target) {
+        currentMillis = millis();
     }
-  }
-  else if(microphoneLevel > loud_threshhold){
-    // Speak loudly
-    previousMillis = currentMillis;
-    while (currentMillis - previousMillis <= 100){
-      drawFace(0, 0, mouth_loud);
-      currentMillis = millis();
-    }
-  }
-  else if(microphoneLevel > yelling_threshhold){
-    // Yell
-    previousMillis = currentMillis;
-    while (currentMillis - previousMillis <= 100){
-      drawFace(0, 0, mouth_yelling);
-      currentMillis = millis();
-    }
-  }
-  else{
-    //Open mouth tiny bit
-    previousMillis = currentMillis;
-    while (currentMillis - previousMillis <= 100){
-      drawFace(0, 0, mouth_quiet);
-      currentMillis = millis();
-    }
-  }
-}
-
-//Show an Idle animation
-void isIdle(){
-    drawFace(0, 0, mouth_closed);
 }
 
 //Draw the passed sprite to the screen pixel by pixel
 //Screen will be drawn left to right, top to bottom
-void drawFace(int x_offset, int y_offset, const uint8_t pixels[]){
-  int imageHeight = 32;
-  int imageWidth = 64;
-  int counter = 0;
-  for (int vertical_increment = 0; vertical_increment < imageHeight; vertical_increment++)
-  {
-    for (int horizontal_increment = 0; horizontal_increment < imageWidth; horizontal_increment++)
-    {
-
-      display.drawPixelRGB888(horizontal_increment + x_offset, vertical_increment + y_offset, pixels[counter], pixels[counter + 1], pixels[counter + 2]);
-
-      counter = counter + 3;
+void drawFace(int x_offset, int y_offset, const uint8_t pixels[]) {
+    // Draw the first panel
+    int image_height = 32;
+    int image_width = 64;
+    int progmem_index = 0;
+    for (int vertical_increment = 0; vertical_increment < image_height; vertical_increment++) {
+        for (int horizontal_increment = 0; horizontal_increment < image_width; horizontal_increment++) {
+            // Draw a single pixel using the next three values in the PROGMEM which represent their R, G and B values
+            display.drawPixelRGB888(horizontal_increment + x_offset, vertical_increment + y_offset, pixels[progmem_index], pixels[progmem_index + 1], pixels[progmem_index + 2]);
+            // Advance the progmem_index by three to get the next RGB pair
+            progmem_index = progmem_index + 3;
+        }
     }
-  }
-  imageHeight = 32;
-  imageWidth = 64;
-  counter = 0;
-  for (int vertical_increment = 0; vertical_increment < imageHeight; vertical_increment++)
-  {
-    for (int horizontal_increment = 63; horizontal_increment > -1; horizontal_increment--)
-    {
-
-      display.drawPixelRGB888(horizontal_increment + 64, vertical_increment + y_offset, pixels[counter], pixels[counter + 1], pixels[counter + 2]);
-
-      counter = counter + 3;
+    // Draw the second panel mirrored
+    image_height = 32;
+    image_width = 64;
+    progmem_index = 0;
+    for (int vertical_increment = 0; vertical_increment < image_height; vertical_increment++) {
+        for (int horizontal_increment = 63; horizontal_increment > -1; horizontal_increment--) {
+            // Draw a single pixel using the next three values in the PROGMEM which represent their R, G and B values
+            display.drawPixelRGB888(horizontal_increment + 64, vertical_increment + y_offset, pixels[progmem_index], pixels[progmem_index + 1], pixels[progmem_index + 2]);
+            // Advance the progmem_index by three to get the next RGB pair
+            progmem_index = progmem_index + 3;
+        }
     }
-  }
 }
 
 //Refresh the screen once every millisecond.
-void Task2code( void * pvParameters ) {  
-  for (;;) {
-    delay(1);
-    display.display(50);
-  }
+void Task2code(void * pvParameters) {
+    for (;;) {
+        delay(1);
+        display.display(50);
+    }
 }
+
+/*
+    TODO:
+    Find a way to update the matrices often enough on one core
+    to not need this annoying function.
+    This function is the only reason this code needs to run on ESP32.
+*/

@@ -51,7 +51,7 @@ However, it is important that you export your files as **C / C++ FastLED** or el
 
 ## The code
 ### The include area
-These various ```#include``` statements import libraries (headers) to the code. The libraries in *Lines 29-21* need to be downloaded via the PlatformIO library manager.
+These various ```#include``` statements import libraries (headers) to the code. These libraries need to be downloaded via the PlatformIO library manager.
 
 ### The define area
 These ```#define``` Statements act as a placeholder without an implicit type and their values are "inserted" at their point of reference in the code.
@@ -83,23 +83,14 @@ This will set up the displays and display a short message to the screen.
 ### loop()
 This function is a standard function of the Arduino library and will run forever after power-on.
 
-It only contains a call to the ```getMicrophoneLevel()``` function, the loop is held so minimal because it is good practice to keep your loop as clean as possible.
+It only contains a call to the ```speak()``` function and a read call to the mic pin.
 
-### getMicrophoneLevel()
-This function listens to the microphone and has no parameters.
-
-The function will read the value from our input pin, if the value exceeds the threshhold set in ```start_talking_threshhold```, the ```isSpeaking()``` function will be called.
-Else, the ```isIdle()``` function will be called.
-
-### isSpeaking()
+### speak()
 This function takes the microphone level as a parameter and uses a chain of if-statements to decide how far the mouth will be opened.
 
 The selected sprite will then be displayed for 100ms.
 
 The else in the end opens the mouth a tiny bit because from the before function the minimal threshhold must already be met.
-
-### isIdle()
-This function takes no parameters and will display the closed mouth sprite for 100ms when called.
 
 ### drawFace()
 This function draws the image to the screen simmilar to an old style CRT monitor.
@@ -107,7 +98,7 @@ Every value of the sprite variable is read and then written to it's correspondin
 The image will be drawn to one Matrix first and then to the other mirrored.
 
 ### Task2code()
-This is a "dirty hack" to keep the displays updated. If you have a different suggestion on how to do this feel free to message me.
+This is a "dirty hack" to keep the displays updated. If you have a different suggestion on how to do this, especially for single core AVR CPUs, feel free to message me.
 
 ## Troubleshooting
 If this documentation hasn't helped you fix issues on your own, feel free to message me on Twitter or Telegram @PanickingLynx .
