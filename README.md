@@ -1,5 +1,11 @@
 # ProtOpenSource: Protogen Interactive Visor Base
 
+## New version!
+Version 1.5! (Took me long enough to make an update)
+I heavily debloated the code, but there might be issues with it so please,
+feel free to pull a copy and let me know via Telegram or Twitter if you encounter any issues.
+(Both have @PanickingLynx as my handle)
+
 ## Table of contents
 1. Introduction
 2. Personal Prerequisites
@@ -43,10 +49,6 @@ Also, make sure to give the code Comments a quick read for some further Informat
 * Add support for random animation play-ins.
 * Remove all delays if possible.
 * Make a dynamic animation loader.
-
-## Known Issues
-
-* Yelling state is never reached. (Need confirmation on that)
 
 ## Addendum
 
