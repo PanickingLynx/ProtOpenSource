@@ -1,11 +1,5 @@
 # ProtOpenSource: Protogen Interactive Visor Base
 
-## New version!
-Version 1.5! (Took me long enough to make an update)
-I heavily debloated the code, but there might be issues with it so please,
-feel free to pull a copy and let me know via Telegram or Twitter if you encounter any issues.
-(Both have @PanickingLynx as my handle)
-
 ## Table of contents
 1. Introduction
 2. Personal Prerequisites
@@ -50,10 +44,17 @@ Also, make sure to give the code Comments a quick read for some further Informat
 * Remove all delays if possible.
 * Make a dynamic animation loader.
 
+## Known Issues
+
+* Yelling state is never reached. (Need confirmation on that)
+
 ## Addendum
 
 I really enjoyed making this code.
 It was a fun experience to get back into doing some Arduino coding.
+
+Without my Friend [@stabbypssm](https://twitter.com/stabbypssm) I wouldn't have gotten the idea, so a big thanks in that regard!
+(Go check her out on Twitter!)
 
 What I really took issue with during the creation of this code,
 is that often when I looked up Protogen groups, which were sometimes even hidden behind a donation paywall,

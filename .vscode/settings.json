@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "cmath": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "memory": "cpp",
+        "random": "cpp",
+        "initializer_list": "cpp",
+        "new": "cpp"
+    },
+    "idf.adapterTargetName": "esp32",
+    "idf.openOcdConfigs": [
+        "boards/esp32-wrover-kit-3.3v.cfg"
+    ],
+    "idf.portWin": "COM9",
+    "idf.customAdapterTargetName": "firebeetle"
+}
